@@ -4,14 +4,12 @@ import json
 
 # === Config ===
 APPS = [
-        "7zip", 
         "vscode", 
         "autohotkey", 
         "ripgrep", 
         "pandoc", 
         "neovide", 
         "neovim", 
-        "git",
         "FiraCode-NF",
         "xournalpp",
         ]  # Add your desired apps
@@ -20,7 +18,7 @@ DEST_DIR = "bucket"
 UPSTREAMS = {
     "main": "https://raw.githubusercontent.com/ScoopInstaller/Main/master/bucket/",
     "extras": "https://raw.githubusercontent.com/ScoopInstaller/Extras/master/bucket/",
-    "nerd-fonts": "https://raw.githubusercontent.com/matthewjberger/scoop-nerd-fonts/master/bucket",
+    "nerd-fonts": "https://raw.githubusercontent.com/matthewjberger/scoop-nerd-fonts/master/bucket/",
 }
 
 os.makedirs(DEST_DIR, exist_ok=True)
