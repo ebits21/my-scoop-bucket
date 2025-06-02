@@ -44,13 +44,13 @@ def download_and_clean_manifest(app, dest_dir):
                         
                     if app == "autohotkey":
                         data = {
-    "version": original["version"],
+    "version": data["version"],
     "description": "Minimal AutoHotkey v2 (64-bit only) with only AutoHotkey64.exe and WindowSpy.ahk.",
-    "homepage": original["homepage"],
-    "license": original["license"],
-    "url": original["url"],
-    "hash": original["hash"],
-    "extract_dir": f"AutoHotkey_{original['version']}",
+    "homepage": data["homepage"],
+    "license": data["license"],
+    "url": data["url"],
+    "hash": data["hash"],
+    "extract_dir": f"AutoHotkey_{data['version']}",
     "architecture": {
         "64bit": {
             "bin": [
@@ -65,8 +65,8 @@ def download_and_clean_manifest(app, dest_dir):
         "    $_.FullName -notlike \"$dir\\WindowSpy.ahk\"",
         "} | Remove-Item -Force -Recurse"
     ],
-    "checkver": original.get("checkver", {}),
-    "autoupdate": original.get("autoupdate", {})
+    "checkver": data.get("checkver", {}),
+    "autoupdate": data.get("autoupdate", {})
 }
 
                     # Save the cleaned manifest
