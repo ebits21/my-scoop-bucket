@@ -4,6 +4,8 @@ import json
 
 # === Config ===
 APPS = [
+        "git",
+        "7zip",
         "vscode", 
         "autohotkey", 
         "ripgrep", 
