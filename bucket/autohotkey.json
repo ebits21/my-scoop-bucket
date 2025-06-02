@@ -5,7 +5,6 @@
     "license": "GPL-2.0-or-later",
     "url": "https://github.com/AutoHotkey/AutoHotkey/releases/download/v2.0.19/AutoHotkey_2.0.19.zip",
     "hash": "4e0d0e65655066a646a210951320feaef0729a3597177131adaec4066bef5869",
-    "extract_dir": "AutoHotkey_2.0.19",
     "architecture": {
         "64bit": {
             "bin": [
