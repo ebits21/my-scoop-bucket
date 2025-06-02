@@ -50,7 +50,6 @@ def download_and_clean_manifest(app, dest_dir):
     "license": data["license"],
     "url": data["url"],
     "hash": data["hash"],
-    "extract_dir": f"AutoHotkey_{data['version']}",
     "architecture": {
         "64bit": {
             "bin": [
