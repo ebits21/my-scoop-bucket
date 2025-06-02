@@ -41,6 +41,33 @@ def download_and_clean_manifest(app, dest_dir):
                     if "shortcuts" in data:
                         print(f"Removing 'shortcuts' from {app}")
                         del data["shortcuts"]
+                        
+                    if app = "autohotkey":
+                        data = {
+    "version": original["version"],
+    "description": "Minimal AutoHotkey v2 (64-bit only) with only AutoHotkey64.exe and WindowSpy.ahk.",
+    "homepage": original["homepage"],
+    "license": original["license"],
+    "url": original["url"],
+    "hash": original["hash"],
+    "extract_dir": f"AutoHotkey_{original['version']}",
+    "architecture": {
+        "64bit": {
+            "bin": [
+                ["AutoHotkey64.exe", "AutoHotkey64"]
+            ]
+        }
+    },
+    "post_install": [
+        "Copy-Item \"$dir\\UX\\WindowSpy.ahk\" \"$dir\" -Force",
+        "Get-ChildItem $dir -Recurse | Where-Object {",
+        "    $_.FullName -notlike \"$dir\\AutoHotkey64.exe\" -and",
+        "    $_.FullName -notlike \"$dir\\WindowSpy.ahk\"",
+        "} | Remove-Item -Force -Recurse"
+    ],
+    "checkver": original.get("checkver", {}),
+    "autoupdate": original.get("autoupdate", {})
+}
 
                     # Save the cleaned manifest
                     dest_path = os.path.join(dest_dir, f"{app}.json")
