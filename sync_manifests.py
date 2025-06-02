@@ -42,7 +42,7 @@ def download_and_clean_manifest(app, dest_dir):
                         print(f"Removing 'shortcuts' from {app}")
                         del data["shortcuts"]
                         
-                    if app = "autohotkey":
+                    if app == "autohotkey":
                         data = {
     "version": original["version"],
     "description": "Minimal AutoHotkey v2 (64-bit only) with only AutoHotkey64.exe and WindowSpy.ahk.",
