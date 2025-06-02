@@ -13,6 +13,7 @@ APPS = [
         "neovim", 
         "git",
         "FiraCode-NF",
+        "xournalpp",
         ]  # Add your desired apps
 DEST_DIR = "bucket"
 
