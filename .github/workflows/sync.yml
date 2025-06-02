@@ -1,0 +1,33 @@
+name: Sync Selected Scoop Manifests
+
+on:
+  schedule:
+    - cron: '0 4 * * *'  # Runs daily at 04:00 UTC
+  workflow_dispatch:      # Allow manual trigger
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run sync script
+        run: python sync_manifests.py
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add bucket
+          git diff --cached --quiet || git commit -m "Sync manifests (auto-update)"
+          git push
