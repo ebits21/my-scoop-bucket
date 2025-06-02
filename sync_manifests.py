@@ -12,6 +12,7 @@ APPS = [
         "neovim", 
         "FiraCode-NF",
         "xournalpp",
+        "vcredist2022",
         ]  # Add your desired apps
 DEST_DIR = "bucket"
 
