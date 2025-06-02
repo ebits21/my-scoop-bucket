@@ -15,6 +15,7 @@ APPS = [
         "FiraCode-NF",
         "xournalpp",
         "vcredist2022",
+        "cryptomator",
         ]  # Add your desired apps
 DEST_DIR = "bucket"
 
