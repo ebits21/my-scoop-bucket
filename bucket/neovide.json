@@ -19,7 +19,14 @@
         "        if ($global) { $content = $content.Replace('HKEY_CURRENT_USER', 'HKEY_LOCAL_MACHINE') }",
         "        Set-Content \"$dir\\$_.reg\" $content -Encoding Ascii -Force",
         "    }",
-        "}"
+        "}",
+        "$ws = New-Object -ComObject WScript.Shell",
+        "$desktop = [Environment]::GetFolderPath('Desktop')",
+        "$desktopShortcut = $ws.CreateShortcut(\"$desktop\\Neovide.lnk\")",
+        "$desktopShortcut.TargetPath = \"$dir\\neovide.exe\"",
+        "$desktopShortcut.WorkingDirectory = \"$dir\"",
+        "$desktopShortcut.IconLocation = \"$dir\\neovide.exe\"",
+        "$desktopShortcut.Save()"
     ],
     "architecture": {
         "64bit": {
