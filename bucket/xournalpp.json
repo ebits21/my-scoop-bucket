@@ -19,5 +19,20 @@
             }
         },
         "extract_dir": "xournalpp-$version-windows-portable-x86_64"
-    }
+    },
+    "post_install": [
+        "New-Item -ItemType Directory -Path \"$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\Xournal\" -Force | Out-Null",
+        "$ws = New-Object -ComObject WScript.Shell",
+        "$startMenuShortcut = $ws.CreateShortcut(\"$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\Xournal\\Xournal.lnk\")",
+        "$startMenuShortcut.TargetPath = \"$dir\\bin\\xournalpp.exe\"",
+        "$startMenuShortcut.WorkingDirectory = \"$dir\"",
+        "$startMenuShortcut.IconLocation = \"$dir\\bin\\xournalpp.exe\"",
+        "$startMenuShortcut.Save()",
+        "$desktop = [Environment]::GetFolderPath('Desktop')",
+        "$desktopShortcut = $ws.CreateShortcut(\"$desktop\\Xournal.lnk\")",
+        "$desktopShortcut.TargetPath = \"$dir\\bin\\xournalpp.exe\"",
+        "$desktopShortcut.WorkingDirectory = \"$dir\"",
+        "$desktopShortcut.IconLocation = \"$dir\\bin\\xournalpp.exe\"",
+        "$desktopShortcut.Save()"
+    ]
 }
