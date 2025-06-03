@@ -62,7 +62,7 @@ def download_and_clean_manifest(app, dest_dir):
         "Get-ChildItem $dir -Recurse | Where-Object {",
         "    $_.FullName -notlike \"$dir\\AutoHotkey64.exe\" -and",
         "    $_.FullName -notlike \"$dir\\WindowSpy.ahk\"",
-        "} | Remove-Item -Force -Recurse"
+        "} | Remove-Item -Force -Recurse";
         
         "New-Item -ItemType Directory -Path \"$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\AutoHotkey\" -Force | Out-Null",
         "$ws = New-Object -ComObject WScript.Shell",
