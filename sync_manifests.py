@@ -44,6 +44,7 @@ def add_desktop_shortcut(data, link_name, exe_path):
     else:
         data["post_install"] = shortcut_commands
 
+    uninstall_desktop_shortcut(data, link_name)
 
 def uninstall_desktop_shortcut(data, link_name):
     uninstall_script = [
@@ -62,12 +63,6 @@ def uninstall_desktop_shortcut(data, link_name):
     else:
         # Create a new entry with the uninstall script
         data["uninstaller"] = {"script": uninstall_script}
-
-
-def add_neovide_shortcut(data):
-    add_desktop_shortcut(data, "neovide", "neovide")
-    uninstall_desktop_shortcut(data, "neovide")
-
 
 def setup_xournal(data):
     uninstall_script = [
@@ -164,7 +159,7 @@ def download_and_clean_manifest(app, dest_dir):
                         setup_xournal(data)
 
                     if app == "neovide":
-                        add_neovide_shortcut(data)
+                        add_desktop_shortcut(data, "neovide", "neovide")
 
                     if app == "autohotkey":
                         data = setup_autohotkey(data)
