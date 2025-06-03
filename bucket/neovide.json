@@ -45,5 +45,11 @@
                 "url": "https://github.com/neovide/neovide/releases/download/$version/neovide.exe.zip"
             }
         }
+    },
+    "uninstaller": {
+        "script": [
+            "$desktop = [Environment]::GetFolderPath(\"Desktop\")",
+            "Remove-Item \"$desktop\\Neovide.lnk\" -ErrorAction SilentlyContinue"
+        ]
     }
 }
