@@ -63,6 +63,22 @@ def download_and_clean_manifest(app, dest_dir):
         "    $_.FullName -notlike \"$dir\\AutoHotkey64.exe\" -and",
         "    $_.FullName -notlike \"$dir\\WindowSpy.ahk\"",
         "} | Remove-Item -Force -Recurse"
+        
+        "New-Item -ItemType Directory -Path \"$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\AutoHotkey\" -Force | Out-Null",
+        "$ws = New-Object -ComObject WScript.Shell",
+    
+        "$startMenuShortcut = $ws.CreateShortcut(\"$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\AutoHotkey\\AutoHotkey.lnk\")",
+        "$startMenuShortcut.TargetPath = \"$dir\\AutoHotkey64.exe\"",
+        "$startMenuShortcut.WorkingDirectory = \"$dir\"",
+        "$startMenuShortcut.IconLocation = \"$dir\\AutoHotkey64.exe\"",
+        "$startMenuShortcut.Save()",
+
+        "$desktop = [Environment]::GetFolderPath('Desktop')",
+        "$desktopShortcut = $ws.CreateShortcut(\"$desktop\\AutoHotkey.lnk\")",
+        "$desktopShortcut.TargetPath = \"$dir\\AutoHotkey64.exe\"",
+        "$desktopShortcut.WorkingDirectory = \"$dir\"",
+        "$desktopShortcut.IconLocation = \"$dir\\AutoHotkey64.exe\"",
+        "$desktopShortcut.Save()"
     ],
     "checkver": data.get("checkver", {}),
     "autoupdate": data.get("autoupdate", {})
