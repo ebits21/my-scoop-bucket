@@ -23,7 +23,7 @@
         "$ws = New-Object -ComObject WScript.Shell",
         "$desktop = [Environment]::GetFolderPath('Desktop')",
         "$desktopShortcut = $ws.CreateShortcut(\"$desktop\\Neovide.lnk\")",
-        "$desktopShortcut.TargetPath = \"$dir\\neovide\"",
+        "$desktopShortcut.TargetPath = \"$dir\\neovide.exe\"",
         "$desktopShortcut.WorkingDirectory = \"$dir\"",
         "$desktopShortcut.IconLocation = \"$dir\\neovide.exe\"",
         "$desktopShortcut.Save()"
