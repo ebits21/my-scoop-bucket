@@ -38,11 +38,18 @@ def add_neovide_shortcut(data):
         '$desktopShortcut.IconLocation = "$dir\\neovide.exe"',
         "$desktopShortcut.Save()",
     ]
+    
+    uninstall_script = [
+        '$desktop = [Environment]::GetFolderPath("Desktop")',
+        'Remove-Item "$desktop\\Neovide.lnk" -ErrorAction SilentlyContinue'
+    ]
 
     if "post_install" in data and isinstance(data["post_install"], list):
         data["post_install"].extend(shortcut_commands)
     else:
         data["post_install"] = shortcut_commands
+    
+    data["uninstaller"] = {"script": uninstall_script}
 
 
 def download_and_clean_manifest(app, dest_dir):
