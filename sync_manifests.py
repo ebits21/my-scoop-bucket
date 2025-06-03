@@ -125,6 +125,7 @@ def setup_autohotkey(data):
         "checkver": data.get("checkver", {}),
         "autoupdate": data.get("autoupdate", {}),
     }
+    return data
 
 
 def download_and_clean_manifest(app, dest_dir):
@@ -149,7 +150,7 @@ def download_and_clean_manifest(app, dest_dir):
                         add_neovide_shortcut(data)
 
                     if app == "autohotkey":
-                        setup_autohotkey(data)
+                        data = setup_autohotkey(data)
 
                     # Save the cleaned manifest
                     dest_path = os.path.join(dest_dir, f"{app}.json")
