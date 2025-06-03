@@ -165,7 +165,7 @@ def download_and_clean_manifest(app, dest_dir):
                     if app == "neovide":
                         remove_item(data, "notes", app)
                         remove_item(data, "post_install", app)
-                         remove_item(data, "pre_uninstall", app)
+                        remove_item(data, "pre_uninstall", app)
                         add_desktop_shortcut(data, "neovide", "neovide.exe")
 
                     if app == "autohotkey":
