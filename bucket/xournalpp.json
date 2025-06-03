@@ -33,6 +33,40 @@
         "$desktopShortcut.TargetPath = \"$dir\\bin\\xournalpp.exe\"",
         "$desktopShortcut.WorkingDirectory = \"$dir\"",
         "$desktopShortcut.IconLocation = \"$dir\\bin\\xournalpp.exe\"",
-        "$desktopShortcut.Save()"
-    ]
+        "$desktopShortcut.Save()",
+        "$ext = '.xopp'",
+        "$progID = 'xournalpp.xoppfile'",
+        "$exePath = \"$dir\\bin\\xournalpp.exe\"",
+        "",
+        "# 1. Associate .xopp with ProgID",
+        "New-Item -Path \"HKCU:\\Software\\Classes\\$ext\" -Force | Out-Null",
+        "Set-ItemProperty -Path \"HKCU:\\Software\\Classes\\$ext\" -Name '' -Value $progID",
+        "",
+        "# 2. Define open command for ProgID",
+        "New-Item -Path \"HKCU:\\Software\\Classes\\$progID\\shell\\open\\command\" -Force | Out-Null",
+        "Set-ItemProperty -Path \"HKCU:\\Software\\Classes\\$progID\\shell\\open\\command\" -Name '' -Value \"`\"$exePath`\" `\"%1`\"\"",
+        "",
+        "# 3. Set icon for ProgID",
+        "New-Item -Path \"HKCU:\\Software\\Classes\\$progID\\DefaultIcon\" -Force | Out-Null",
+        "Set-ItemProperty -Path \"HKCU:\\Software\\Classes\\$progID\\DefaultIcon\" -Name '' -Value \"`\"$exePath`\",0\""
+    ],
+    "uninstaller": {
+        "script": [
+            "$desktop = [Environment]::GetFolderPath(\"Desktop\")",
+            "Remove-Item \"$desktop\\Xournal.lnk\" -ErrorAction SilentlyContinue",
+            "Remove-Item \"$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\Xournal\\Xournal.lnk\" -ErrorAction SilentlyContinue",
+            "Remove-Item \"$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\Xournal\" -ErrorAction SilentlyContinue -Recurse",
+            "$ext = '.xopp'",
+            "$progID = 'xournalpp.xoppfile'",
+            "",
+            "# Remove file extension association",
+            "Remove-Item -Path \"HKCU:\\Software\\Classes\\$ext\" -Recurse -Force -ErrorAction SilentlyContinue",
+            "",
+            "# Remove ProgID definition",
+            "Remove-Item -Path \"HKCU:\\Software\\Classes\\$progID\" -Recurse -Force -ErrorAction SilentlyContinue",
+            "",
+            "# Remove UserChoice if set (may override your settings)",
+            "Remove-Item -Path \"HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\$ext\" -Recurse -Force -ErrorAction SilentlyContinue"
+        ]
+    }
 }
