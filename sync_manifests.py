@@ -28,6 +28,23 @@ UPSTREAMS = {
 os.makedirs(DEST_DIR, exist_ok=True)
 
 
+def add_neovide_shortcut(data):
+    shortcut_commands = [
+        "$ws = New-Object -ComObject WScript.Shell",
+        "$desktop = [Environment]::GetFolderPath('Desktop')",
+        '$desktopShortcut = $ws.CreateShortcut("$desktop\\Neovide.lnk")',
+        '$desktopShortcut.TargetPath = "$dir\\neovide.exe"',
+        '$desktopShortcut.WorkingDirectory = "$dir"',
+        '$desktopShortcut.IconLocation = "$dir\\neovide.exe"',
+        "$desktopShortcut.Save()",
+    ]
+
+    if "post_install" in data and isinstance(data["post_install"], list):
+        data["post_install"].extend(shortcut_commands)
+    else:
+        data["post_install"] = shortcut_commands
+
+
 def download_and_clean_manifest(app, dest_dir):
     for name, base_url in UPSTREAMS.items():
         url = f"{base_url}{app}.json"
@@ -59,6 +76,9 @@ def download_and_clean_manifest(app, dest_dir):
                             '$desktopShortcut.IconLocation = "$dir\\bin\\xournalpp.exe"',
                             "$desktopShortcut.Save()",
                         ]
+
+                    if app == "neovide":
+                        add_neovide_shortcut(data)
 
                     if app == "autohotkey":
                         data = {
