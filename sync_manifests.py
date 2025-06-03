@@ -38,18 +38,93 @@ def add_neovide_shortcut(data):
         '$desktopShortcut.IconLocation = "$dir\\neovide.exe"',
         "$desktopShortcut.Save()",
     ]
-    
+
     uninstall_script = [
         '$desktop = [Environment]::GetFolderPath("Desktop")',
-        'Remove-Item "$desktop\\Neovide.lnk" -ErrorAction SilentlyContinue'
+        'Remove-Item "$desktop\\Neovide.lnk" -ErrorAction SilentlyContinue',
     ]
 
     if "post_install" in data and isinstance(data["post_install"], list):
         data["post_install"].extend(shortcut_commands)
     else:
         data["post_install"] = shortcut_commands
-    
+
     data["uninstaller"] = {"script": uninstall_script}
+
+
+def setup_xournal(data):
+    uninstall_script = [
+        '$desktop = [Environment]::GetFolderPath("Desktop")',
+        'Remove-Item "$desktop\\Xournal.lnk" -ErrorAction SilentlyContinue',
+        'Remove-Item "$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\Xournal\\Xournal.lnk" -ErrorAction SilentlyContinue',
+        'Remove-Item "$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\Xournal" -ErrorAction SilentlyContinue -Recurse',
+        "$ext = '.xopp'",
+        "$progID = 'xournalpp.xoppfile'",
+        "",
+        "# Remove file extension association",
+        'Remove-Item -Path "HKCU:\\Software\\Classes\\$ext" -Recurse -Force -ErrorAction SilentlyContinue',
+        "",
+        "# Remove ProgID definition",
+        'Remove-Item -Path "HKCU:\\Software\\Classes\\$progID" -Recurse -Force -ErrorAction SilentlyContinue',
+        "",
+        "# Remove UserChoice if set (may override your settings)",
+        'Remove-Item -Path "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\$ext" -Recurse -Force -ErrorAction SilentlyContinue',
+    ]
+
+    if "post_install" not in data:
+        data["post_install"] = [
+            'New-Item -ItemType Directory -Path "$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\Xournal" -Force | Out-Null',
+            "$ws = New-Object -ComObject WScript.Shell",
+            '$startMenuShortcut = $ws.CreateShortcut("$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\Xournal\\Xournal.lnk")',
+            '$startMenuShortcut.TargetPath = "$dir\\bin\\xournalpp.exe"',
+            '$startMenuShortcut.WorkingDirectory = "$dir"',
+            '$startMenuShortcut.IconLocation = "$dir\\bin\\xournalpp.exe"',
+            "$startMenuShortcut.Save()",
+            "$desktop = [Environment]::GetFolderPath('Desktop')",
+            '$desktopShortcut = $ws.CreateShortcut("$desktop\\Xournal.lnk")',
+            '$desktopShortcut.TargetPath = "$dir\\bin\\xournalpp.exe"',
+            '$desktopShortcut.WorkingDirectory = "$dir"',
+            '$desktopShortcut.IconLocation = "$dir\\bin\\xournalpp.exe"',
+            "$desktopShortcut.Save()",
+            "$ext = '.xopp'",
+            "$progID = 'xournalpp.xoppfile'",
+            '$exePath = "$dir\\bin\\xournalpp.exe"',
+            "",
+            "# 1. Associate .xopp with ProgID",
+            'New-Item -Path "HKCU:\\Software\\Classes\\$ext" -Force | Out-Null',
+            "Set-ItemProperty -Path \"HKCU:\\Software\\Classes\\$ext\" -Name '' -Value $progID",
+            "",
+            "# 2. Define open command for ProgID",
+            'New-Item -Path "HKCU:\\Software\\Classes\\$progID\\shell\\open\\command" -Force | Out-Null',
+            'Set-ItemProperty -Path "HKCU:\\Software\\Classes\\$progID\\shell\\open\\command" -Name \'\' -Value "`"$exePath`" `"%1`""',
+            "",
+            "# 3. Set icon for ProgID",
+            'New-Item -Path "HKCU:\\Software\\Classes\\$progID\\DefaultIcon" -Force | Out-Null',
+            'Set-ItemProperty -Path "HKCU:\\Software\\Classes\\$progID\\DefaultIcon" -Name \'\' -Value "`"$exePath`",0"',
+        ]
+
+    data["uninstaller"] = {"script": uninstall_script}
+
+
+def setup_autohotkey(data):
+    data = {
+        "version": data["version"],
+        "description": "Minimal AutoHotkey v2 (64-bit only) with only AutoHotkey64.exe and WindowSpy.ahk.",
+        "homepage": data["homepage"],
+        "license": data["license"],
+        "url": data["url"],
+        "hash": data["hash"],
+        "architecture": {"64bit": {"bin": [["AutoHotkey64.exe", "AutoHotkey64"]]}},
+        "post_install": [
+            'Copy-Item "$dir\\UX\\WindowSpy.ahk" "$dir" -Force',
+            "Get-ChildItem $dir -Recurse | Where-Object {",
+            '    $_.FullName -notlike "$dir\\AutoHotkey64.exe" -and',
+            '    $_.FullName -notlike "$dir\\WindowSpy.ahk"',
+            "} | Remove-Item -Force -Recurse",
+        ],
+        "checkver": data.get("checkver", {}),
+        "autoupdate": data.get("autoupdate", {}),
+    }
 
 
 def download_and_clean_manifest(app, dest_dir):
@@ -67,47 +142,14 @@ def download_and_clean_manifest(app, dest_dir):
                         print(f"Removing 'shortcuts' from {app}")
                         del data["shortcuts"]
 
-                    if app == "xournalpp" and "post_install" not in data:
-                        data["post_install"] = [
-                            'New-Item -ItemType Directory -Path "$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\Xournal" -Force | Out-Null',
-                            "$ws = New-Object -ComObject WScript.Shell",
-                            '$startMenuShortcut = $ws.CreateShortcut("$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\Xournal\\Xournal.lnk")',
-                            '$startMenuShortcut.TargetPath = "$dir\\bin\\xournalpp.exe"',
-                            '$startMenuShortcut.WorkingDirectory = "$dir"',
-                            '$startMenuShortcut.IconLocation = "$dir\\bin\\xournalpp.exe"',
-                            "$startMenuShortcut.Save()",
-                            "$desktop = [Environment]::GetFolderPath('Desktop')",
-                            '$desktopShortcut = $ws.CreateShortcut("$desktop\\Xournal.lnk")',
-                            '$desktopShortcut.TargetPath = "$dir\\bin\\xournalpp.exe"',
-                            '$desktopShortcut.WorkingDirectory = "$dir"',
-                            '$desktopShortcut.IconLocation = "$dir\\bin\\xournalpp.exe"',
-                            "$desktopShortcut.Save()",
-                        ]
+                    if app == "xournalpp":
+                        setup_xournal(data)
 
                     if app == "neovide":
                         add_neovide_shortcut(data)
 
                     if app == "autohotkey":
-                        data = {
-                            "version": data["version"],
-                            "description": "Minimal AutoHotkey v2 (64-bit only) with only AutoHotkey64.exe and WindowSpy.ahk.",
-                            "homepage": data["homepage"],
-                            "license": data["license"],
-                            "url": data["url"],
-                            "hash": data["hash"],
-                            "architecture": {
-                                "64bit": {"bin": [["AutoHotkey64.exe", "AutoHotkey64"]]}
-                            },
-                            "post_install": [
-                                'Copy-Item "$dir\\UX\\WindowSpy.ahk" "$dir" -Force',
-                                "Get-ChildItem $dir -Recurse | Where-Object {",
-                                '    $_.FullName -notlike "$dir\\AutoHotkey64.exe" -and',
-                                '    $_.FullName -notlike "$dir\\WindowSpy.ahk"',
-                                "} | Remove-Item -Force -Recurse",
-                            ],
-                            "checkver": data.get("checkver", {}),
-                            "autoupdate": data.get("autoupdate", {}),
-                        }
+                        setup_autohotkey(data)
 
                     # Save the cleaned manifest
                     dest_path = os.path.join(dest_dir, f"{app}.json")
