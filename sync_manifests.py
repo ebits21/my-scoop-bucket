@@ -92,15 +92,15 @@ def setup_xournal(data):
             "",
             "# 1. Associate .xopp with ProgID",
             'New-Item -Path "HKCU:\\Software\\Classes\\$ext" -Force | Out-Null',
-            "Set-ItemProperty -Path \"HKCU:\\Software\\Classes\\$ext\" -Name '' -Value $progID",
+            "Set-ItemProperty -Path \"HKCU:\\Software\\Classes\\$ext\" -Name '(default)' -Value $progID",
             "",
             "# 2. Define open command for ProgID",
             'New-Item -Path "HKCU:\\Software\\Classes\\$progID\\shell\\open\\command" -Force | Out-Null',
-            'Set-ItemProperty -Path "HKCU:\\Software\\Classes\\$progID\\shell\\open\\command" -Name \'\' -Value "`"$exePath`" `"%1`""',
+            'Set-ItemProperty -Path "HKCU:\\Software\\Classes\\$progID\\shell\\open\\command" -Name \'(default)\' -Value "`"$exePath`" `"%1`""',
             "",
             "# 3. Set icon for ProgID",
             'New-Item -Path "HKCU:\\Software\\Classes\\$progID\\DefaultIcon" -Force | Out-Null',
-            'Set-ItemProperty -Path "HKCU:\\Software\\Classes\\$progID\\DefaultIcon" -Name \'\' -Value "`"$exePath`",0"',
+            'Set-ItemProperty -Path "HKCU:\\Software\\Classes\\$progID\\DefaultIcon" -Name \'(default)\' -Value "`"$exePath`",0"',
         ]
 
     data["uninstaller"] = {"script": uninstall_script}
