@@ -35,7 +35,7 @@ def add_desktop_shortcut(data, link_name, exe_path):
         f'$desktopShortcut = $ws.CreateShortcut("$desktop\\{link_name.capitalize()}.lnk")',
         f'$desktopShortcut.TargetPath = "$dir\\{exe_path}"',
         '$desktopShortcut.WorkingDirectory = "$dir"',
-        f'$desktopShortcut.IconLocation = "$dir\\{exe_path}.exe"',
+        f'$desktopShortcut.IconLocation = "$dir\\{exe_path}"',
         "$desktopShortcut.Save()",
     ]
 
@@ -159,7 +159,7 @@ def download_and_clean_manifest(app, dest_dir):
                         setup_xournal(data)
 
                     if app == "neovide":
-                        add_desktop_shortcut(data, "neovide", "neovide")
+                        add_desktop_shortcut(data, "neovide", "neovide.exe")
 
                     if app == "autohotkey":
                         data = setup_autohotkey(data)
