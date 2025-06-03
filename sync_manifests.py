@@ -28,26 +28,45 @@ UPSTREAMS = {
 os.makedirs(DEST_DIR, exist_ok=True)
 
 
-def add_neovide_shortcut(data):
+def add_desktop_shortcut(data, link_name, exe_path):
     shortcut_commands = [
         "$ws = New-Object -ComObject WScript.Shell",
         "$desktop = [Environment]::GetFolderPath('Desktop')",
-        '$desktopShortcut = $ws.CreateShortcut("$desktop\\Neovide.lnk")',
-        '$desktopShortcut.TargetPath = "$dir\\neovide.exe"',
+        f'$desktopShortcut = $ws.CreateShortcut("$desktop\\{link_name.capitalize()}.lnk")',
+        f'$desktopShortcut.TargetPath = "$dir\\{exe_path}"',
         '$desktopShortcut.WorkingDirectory = "$dir"',
-        '$desktopShortcut.IconLocation = "$dir\\neovide.exe"',
+        f'$desktopShortcut.IconLocation = "$dir\\{exe_path}.exe"',
         "$desktopShortcut.Save()",
-    ]
-
-    uninstall_script = [
-        '$desktop = [Environment]::GetFolderPath("Desktop")',
-        'Remove-Item "$desktop\\Neovide.lnk" -ErrorAction SilentlyContinue',
     ]
 
     if "post_install" in data and isinstance(data["post_install"], list):
         data["post_install"].extend(shortcut_commands)
     else:
         data["post_install"] = shortcut_commands
+
+
+def add_neovide_shortcut(data):
+    # shortcut_commands = [
+    #    "$ws = New-Object -ComObject WScript.Shell",
+    #    "$desktop = [Environment]::GetFolderPath('Desktop')",
+    #    '$desktopShortcut = $ws.CreateShortcut("$desktop\\Neovide.lnk")',
+    #    '$desktopShortcut.TargetPath = "$dir\\neovide.exe"',
+    #    '$desktopShortcut.WorkingDirectory = "$dir"',
+    #    '$desktopShortcut.IconLocation = "$dir\\neovide.exe"',
+    #    "$desktopShortcut.Save()",
+    # ]
+
+    add_desktop_shortcut(data, "neovide", "neovide")
+
+    uninstall_script = [
+        '$desktop = [Environment]::GetFolderPath("Desktop")',
+        'Remove-Item "$desktop\\Neovide.lnk" -ErrorAction SilentlyContinue',
+    ]
+
+    # if "post_install" in data and isinstance(data["post_install"], list):
+    #    data["post_install"].extend(shortcut_commands)
+    # else:
+    #    data["post_install"] = shortcut_commands
 
     data["uninstaller"] = {"script": uninstall_script}
 
