@@ -27,7 +27,13 @@ UPSTREAMS = {
 
 os.makedirs(DEST_DIR, exist_ok=True)
 
-
+def remove_item(data, item, app="manifest"):
+    if item in data:
+        print(f'Removing "{item}" from {app}.') 
+        del data[item]
+    else:
+        print(f'Could not remove "{item}" from {app}, not found.')
+    
 def add_desktop_shortcut(data, link_name, exe_path):
     shortcut_commands = [
         "$ws = New-Object -ComObject WScript.Shell",
@@ -151,14 +157,15 @@ def download_and_clean_manifest(app, dest_dir):
                     data = json.loads(response.text)
 
                     # Remove 'shortcuts' key if present
-                    if "shortcuts" in data:
-                        print(f"Removing 'shortcuts' from {app}")
-                        del data["shortcuts"]
+                    remove_item(data, "shortcuts", app)
 
                     if app == "xournalpp":
                         setup_xournal(data)
 
                     if app == "neovide":
+                        remove_item(data, "notes", app)
+                        remove_item(data, "post_install", app)
+                         remove_item(data, "pre_uninstall", app)
                         add_desktop_shortcut(data, "neovide", "neovide.exe")
 
                     if app == "autohotkey":
