@@ -44,32 +44,22 @@ def add_desktop_shortcut(data, link_name, exe_path):
     else:
         data["post_install"] = shortcut_commands
 
-
-def add_neovide_shortcut(data):
-    # shortcut_commands = [
-    #    "$ws = New-Object -ComObject WScript.Shell",
-    #    "$desktop = [Environment]::GetFolderPath('Desktop')",
-    #    '$desktopShortcut = $ws.CreateShortcut("$desktop\\Neovide.lnk")',
-    #    '$desktopShortcut.TargetPath = "$dir\\neovide.exe"',
-    #    '$desktopShortcut.WorkingDirectory = "$dir"',
-    #    '$desktopShortcut.IconLocation = "$dir\\neovide.exe"',
-    #    "$desktopShortcut.Save()",
-    # ]
-
-    add_desktop_shortcut(data, "neovide", "neovide")
-
+def uninstall_desktop_shortcut(data, link_name):
     uninstall_script = [
         '$desktop = [Environment]::GetFolderPath("Desktop")',
-        'Remove-Item "$desktop\\Neovide.lnk" -ErrorAction SilentlyContinue',
+        f'Remove-Item "$desktop\\{link_name.capitalize()}.lnk" -ErrorAction SilentlyContinue',
     ]
 
-    # if "post_install" in data and isinstance(data["post_install"], list):
-    #    data["post_install"].extend(shortcut_commands)
-    # else:
-    #    data["post_install"] = shortcut_commands
+    #if "uninstaller" in data and isinstance(data["uninstaller"], list):
+    #    data["uninstaller"].extend(uninstall_script)
+    #else:
+    #    data["uninstaller"] = uninstall_script
 
     data["uninstaller"] = {"script": uninstall_script}
 
+def add_neovide_shortcut(data):
+    add_desktop_shortcut(data, "neovide", "neovide")
+    uninstall_desktop_shortcut(data, "neovide")
 
 def setup_xournal(data):
     uninstall_script = [
