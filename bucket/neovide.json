@@ -3,31 +3,9 @@
     "description": "A simple GUI for Neovim",
     "homepage": "https://neovide.dev",
     "license": "MIT",
-    "notes": [
-        "Add Open with Neovide as a context menu option by running:",
-        "reg import \"$dir\\install-context.reg\""
-    ],
     "suggest": {
         "neovim": "neovim"
     },
-    "post_install": [
-        "$neovide = \"$dir\\neovide.exe\".Replace('\\', '\\\\')",
-        "'install-context', 'uninstall-context' | ForEach-Object {",
-        "    if (Test-Path \"$bucketsdir\\extras\\scripts\\$app\\$_.reg\") {",
-        "        $content = Get-Content \"$bucketsdir\\extras\\scripts\\$app\\$_.reg\"",
-        "        $content = $content.Replace('$neovide', $neovide)",
-        "        if ($global) { $content = $content.Replace('HKEY_CURRENT_USER', 'HKEY_LOCAL_MACHINE') }",
-        "        Set-Content \"$dir\\$_.reg\" $content -Encoding Ascii -Force",
-        "    }",
-        "}",
-        "$ws = New-Object -ComObject WScript.Shell",
-        "$desktop = [Environment]::GetFolderPath('Desktop')",
-        "$desktopShortcut = $ws.CreateShortcut(\"$desktop\\Neovide.lnk\")",
-        "$desktopShortcut.TargetPath = \"$dir\\neovide.exe\"",
-        "$desktopShortcut.WorkingDirectory = \"$dir\"",
-        "$desktopShortcut.IconLocation = \"$dir\\neovide.exe\"",
-        "$desktopShortcut.Save()"
-    ],
     "architecture": {
         "64bit": {
             "url": "https://github.com/neovide/neovide/releases/download/0.15.0/neovide.exe.zip",
@@ -35,7 +13,6 @@
         }
     },
     "bin": "neovide.exe",
-    "pre_uninstall": "if ($cmd -eq 'uninstall') { reg import \"$dir\\uninstall-context.reg\" *>nul }",
     "checkver": {
         "github": "https://github.com/neovide/neovide"
     },
@@ -46,6 +23,15 @@
             }
         }
     },
+    "post_install": [
+        "$ws = New-Object -ComObject WScript.Shell",
+        "$desktop = [Environment]::GetFolderPath('Desktop')",
+        "$desktopShortcut = $ws.CreateShortcut(\"$desktop\\Neovide.lnk\")",
+        "$desktopShortcut.TargetPath = \"$dir\\neovide.exe\"",
+        "$desktopShortcut.WorkingDirectory = \"$dir\"",
+        "$desktopShortcut.IconLocation = \"$dir\\neovide.exe\"",
+        "$desktopShortcut.Save()"
+    ],
     "uninstaller": {
         "script": [
             "$desktop = [Environment]::GetFolderPath(\"Desktop\")",
