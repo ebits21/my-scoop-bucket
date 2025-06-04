@@ -27,37 +27,23 @@ UPSTREAMS = {
 
 os.makedirs(DEST_DIR, exist_ok=True)
 
+
 def remove_item(data, item, app="manifest"):
     if item in data:
-        print(f'Removing "{item}" from {app}.') 
+        print(f'Removing "{item}" from {app}.')
         del data[item]
     else:
         print(f'Could not remove "{item}" from {app}, not found.')
-    
-def add_desktop_shortcut(data, link_name, exe_path):
-    shortcut_commands = [
-        "$ws = New-Object -ComObject WScript.Shell",
-        "$desktop = [Environment]::GetFolderPath('Desktop')",
-        f'$desktopShortcut = $ws.CreateShortcut("$desktop\\{link_name.capitalize()}.lnk")',
-        f'$desktopShortcut.TargetPath = "$dir\\{exe_path}"',
-        '$desktopShortcut.WorkingDirectory = "$dir"',
-        f'$desktopShortcut.IconLocation = "$dir\\{exe_path}"',
-        "$desktopShortcut.Save()",
-    ]
 
+
+def update_post_install(data, script):
     if "post_install" in data and isinstance(data["post_install"], list):
-        data["post_install"].extend(shortcut_commands)
+        data["post_install"].extend(script)
     else:
-        data["post_install"] = shortcut_commands
+        data["post_install"] = script
 
-    uninstall_desktop_shortcut(data, link_name)
 
-def uninstall_desktop_shortcut(data, link_name):
-    uninstall_script = [
-        '$desktop = [Environment]::GetFolderPath("Desktop")',
-        f'Remove-Item "$desktop\\{link_name.capitalize()}.lnk" -ErrorAction SilentlyContinue',
-    ]
-
+def update_uninstaller(data, script):
     # Check if "uninstaller" key exists and is a dictionary with a "script" key
     if (
         "uninstaller" in data
@@ -65,19 +51,89 @@ def uninstall_desktop_shortcut(data, link_name):
         and "script" in data["uninstaller"]
     ):
         # Append the new script to the existing script list
-        data["uninstaller"]["script"].extend(uninstall_script)
+        data["uninstaller"]["script"].extend(script)
     else:
         # Create a new entry with the uninstall script
-        data["uninstaller"] = {"script": uninstall_script}
+        data["uninstaller"] = {"script": script}
 
-def setup_xournal(data):
+
+def add_desktop_shortcut(data, link_name, exe_path):
+    link_name = link_name.capitalize()
+    shortcut_commands = [
+        "$ws = New-Object -ComObject WScript.Shell",
+        "$desktop = [Environment]::GetFolderPath('Desktop')",
+        f'$desktopShortcut = $ws.CreateShortcut("$desktop\\{link_name}.lnk")',
+        f'$desktopShortcut.TargetPath = "$dir\\{exe_path}"',
+        '$desktopShortcut.WorkingDirectory = "$dir"',
+        f'$desktopShortcut.IconLocation = "$dir\\{exe_path}"',
+        "$desktopShortcut.Save()",
+    ]
+
+    update_post_install(data, shortcut_commands)
+    uninstall_desktop_shortcut(data, link_name)
+
+
+def uninstall_desktop_shortcut(data, link_name):
     uninstall_script = [
         '$desktop = [Environment]::GetFolderPath("Desktop")',
-        'Remove-Item "$desktop\\Xournal.lnk" -ErrorAction SilentlyContinue',
-        'Remove-Item "$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\Xournal\\Xournal.lnk" -ErrorAction SilentlyContinue',
-        'Remove-Item "$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\Xournal" -ErrorAction SilentlyContinue -Recurse',
-        "$ext = '.xopp'",
-        "$progID = 'xournalpp.xoppfile'",
+        f'Remove-Item "$desktop\\{link_name}.lnk" -ErrorAction SilentlyContinue',
+    ]
+
+    update_uninstaller(data, uninstall_script)
+
+
+def add_startmenu_shortcut(data, link_name, exe_path):
+    link_name = link_name.capitalize()
+    shortcut_commands = [
+        f'New-Item -ItemType Directory -Path "$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\{link_name}" -Force | Out-Null',
+        "$ws = New-Object -ComObject WScript.Shell",
+        f'$startMenuShortcut = $ws.CreateShortcut("$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\{link_name}\\{link_name}.lnk")',
+        f'$startMenuShortcut.TargetPath = "$dir\\{exe_path}"',
+        '$startMenuShortcut.WorkingDirectory = "$dir"',
+        f'$startMenuShortcut.IconLocation = "$dir\\{exe_path}"',
+        "$startMenuShortcut.Save()",
+    ]
+
+    update_post_install(data, shortcut_commands)
+    uninstall_startmenu_shortcut(data, link_name)
+
+
+def uninstall_startmenu_shortcut(data, link_name):
+    uninstall_script = [
+        f'Remove-Item "$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\{link_name}\\{link_name}.lnk" -ErrorAction SilentlyContinue',
+        f'Remove-Item "$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\{link_name}" -ErrorAction SilentlyContinue -Recurse',
+    ]
+
+    update_uninstaller(data, uninstall_script)
+
+
+def add_file_association(data, file_ext, prog_id, exe_path):
+    association_script = [
+        f"$ext = '{file_ext}'",
+        f"$progID = '{prog_id}'",
+        f'$exePath = "$dir\\{exe_path}"',
+        "",
+        "# 1. Associate .xopp with ProgID",
+        'New-Item -Path "HKCU:\\Software\\Classes\\$ext" -Force | Out-Null',
+        "Set-ItemProperty -Path \"HKCU:\\Software\\Classes\\$ext\" -Name '(default)' -Value $progID",
+        "",
+        "# 2. Define open command for ProgID",
+        'New-Item -Path "HKCU:\\Software\\Classes\\$progID\\shell\\open\\command" -Force | Out-Null',
+        'Set-ItemProperty -Path "HKCU:\\Software\\Classes\\$progID\\shell\\open\\command" -Name \'(default)\' -Value "`"$exePath`" `"%1`""',
+        "",
+        "# 3. Set icon for ProgID",
+        'New-Item -Path "HKCU:\\Software\\Classes\\$progID\\DefaultIcon" -Force | Out-Null',
+        'Set-ItemProperty -Path "HKCU:\\Software\\Classes\\$progID\\DefaultIcon" -Name \'(default)\' -Value "`"$exePath`",0"',
+    ]
+
+    update_post_install(data, association_script)
+    uninstall_file_association(data, file_ext, prog_id)
+
+
+def uninstall_file_association(data, file_ext, prog_id):
+    uninstall_script = [
+        f"$ext = '{file_ext}'",
+        f"$progID = '{prog_id}'",
         "",
         "# Remove file extension association",
         'Remove-Item -Path "HKCU:\\Software\\Classes\\$ext" -Recurse -Force -ErrorAction SilentlyContinue',
@@ -89,39 +145,61 @@ def setup_xournal(data):
         'Remove-Item -Path "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\$ext" -Recurse -Force -ErrorAction SilentlyContinue',
     ]
 
-    if "post_install" not in data:
-        data["post_install"] = [
-            'New-Item -ItemType Directory -Path "$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\Xournal" -Force | Out-Null',
-            "$ws = New-Object -ComObject WScript.Shell",
-            '$startMenuShortcut = $ws.CreateShortcut("$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\Xournal\\Xournal.lnk")',
-            '$startMenuShortcut.TargetPath = "$dir\\bin\\xournalpp.exe"',
-            '$startMenuShortcut.WorkingDirectory = "$dir"',
-            '$startMenuShortcut.IconLocation = "$dir\\bin\\xournalpp.exe"',
-            "$startMenuShortcut.Save()",
-            "$desktop = [Environment]::GetFolderPath('Desktop')",
-            '$desktopShortcut = $ws.CreateShortcut("$desktop\\Xournal.lnk")',
-            '$desktopShortcut.TargetPath = "$dir\\bin\\xournalpp.exe"',
-            '$desktopShortcut.WorkingDirectory = "$dir"',
-            '$desktopShortcut.IconLocation = "$dir\\bin\\xournalpp.exe"',
-            "$desktopShortcut.Save()",
-            "$ext = '.xopp'",
-            "$progID = 'xournalpp.xoppfile'",
-            '$exePath = "$dir\\bin\\xournalpp.exe"',
-            "",
-            "# 1. Associate .xopp with ProgID",
-            'New-Item -Path "HKCU:\\Software\\Classes\\$ext" -Force | Out-Null',
-            "Set-ItemProperty -Path \"HKCU:\\Software\\Classes\\$ext\" -Name '(default)' -Value $progID",
-            "",
-            "# 2. Define open command for ProgID",
-            'New-Item -Path "HKCU:\\Software\\Classes\\$progID\\shell\\open\\command" -Force | Out-Null',
-            'Set-ItemProperty -Path "HKCU:\\Software\\Classes\\$progID\\shell\\open\\command" -Name \'(default)\' -Value "`"$exePath`" `"%1`""',
-            "",
-            "# 3. Set icon for ProgID",
-            'New-Item -Path "HKCU:\\Software\\Classes\\$progID\\DefaultIcon" -Force | Out-Null',
-            'Set-ItemProperty -Path "HKCU:\\Software\\Classes\\$progID\\DefaultIcon" -Name \'(default)\' -Value "`"$exePath`",0"',
-        ]
+    update_uninstaller(data, uninstall_script)
 
-    data["uninstaller"] = {"script": uninstall_script}
+
+# def setup_xournal(data):
+#     uninstall_script = [
+#         '$desktop = [Environment]::GetFolderPath("Desktop")',
+#         'Remove-Item "$desktop\\Xournal.lnk" -ErrorAction SilentlyContinue',
+#         'Remove-Item "$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\Xournal\\Xournal.lnk" -ErrorAction SilentlyContinue',
+#         'Remove-Item "$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\Xournal" -ErrorAction SilentlyContinue -Recurse',
+#         "$ext = '.xopp'",
+#         "$progID = 'xournalpp.xoppfile'",
+#         "",
+#         "# Remove file extension association",
+#         'Remove-Item -Path "HKCU:\\Software\\Classes\\$ext" -Recurse -Force -ErrorAction SilentlyContinue',
+#         "",
+#         "# Remove ProgID definition",
+#         'Remove-Item -Path "HKCU:\\Software\\Classes\\$progID" -Recurse -Force -ErrorAction SilentlyContinue',
+#         "",
+#         "# Remove UserChoice if set (may override your settings)",
+#         'Remove-Item -Path "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\$ext" -Recurse -Force -ErrorAction SilentlyContinue',
+#     ]
+
+#     if "post_install" not in data:
+#         data["post_install"] = [
+#             'New-Item -ItemType Directory -Path "$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\Xournal" -Force | Out-Null',
+#             "$ws = New-Object -ComObject WScript.Shell",
+#             '$startMenuShortcut = $ws.CreateShortcut("$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\Xournal\\Xournal.lnk")',
+#             '$startMenuShortcut.TargetPath = "$dir\\bin\\xournalpp.exe"',
+#             '$startMenuShortcut.WorkingDirectory = "$dir"',
+#             '$startMenuShortcut.IconLocation = "$dir\\bin\\xournalpp.exe"',
+#             "$startMenuShortcut.Save()",
+#             "$desktop = [Environment]::GetFolderPath('Desktop')",
+#             '$desktopShortcut = $ws.CreateShortcut("$desktop\\Xournal.lnk")',
+#             '$desktopShortcut.TargetPath = "$dir\\bin\\xournalpp.exe"',
+#             '$desktopShortcut.WorkingDirectory = "$dir"',
+#             '$desktopShortcut.IconLocation = "$dir\\bin\\xournalpp.exe"',
+#             "$desktopShortcut.Save()",
+#             "$ext = '.xopp'",
+#             "$progID = 'xournalpp.xoppfile'",
+#             '$exePath = "$dir\\bin\\xournalpp.exe"',
+#             "",
+#             "# 1. Associate .xopp with ProgID",
+#             'New-Item -Path "HKCU:\\Software\\Classes\\$ext" -Force | Out-Null',
+#             "Set-ItemProperty -Path \"HKCU:\\Software\\Classes\\$ext\" -Name '(default)' -Value $progID",
+#             "",
+#             "# 2. Define open command for ProgID",
+#             'New-Item -Path "HKCU:\\Software\\Classes\\$progID\\shell\\open\\command" -Force | Out-Null',
+#             'Set-ItemProperty -Path "HKCU:\\Software\\Classes\\$progID\\shell\\open\\command" -Name \'(default)\' -Value "`"$exePath`" `"%1`""',
+#             "",
+#             "# 3. Set icon for ProgID",
+#             'New-Item -Path "HKCU:\\Software\\Classes\\$progID\\DefaultIcon" -Force | Out-Null',
+#             'Set-ItemProperty -Path "HKCU:\\Software\\Classes\\$progID\\DefaultIcon" -Name \'(default)\' -Value "`"$exePath`",0"',
+#         ]
+
+#     data["uninstaller"] = {"script": uninstall_script}
 
 
 def setup_autohotkey(data):
@@ -160,7 +238,11 @@ def download_and_clean_manifest(app, dest_dir):
                     remove_item(data, "shortcuts", app)
 
                     if app == "xournalpp":
-                        setup_xournal(data)
+                        add_desktop_shortcut(data, "xournal", "bin\\xournalpp.exe")
+                        add_startmenu_shortcut(data, "xournal", "bin\\xournalpp.exe")
+                        add_file_association(
+                            data, ".xopp", "xournalpp.xoppfile", "bin\\xournalpp.exe"
+                        )
 
                     if app == "neovide":
                         remove_item(data, "notes", app)
