@@ -16,6 +16,7 @@ APPS = [
     "xournalpp",
     "vcredist2022",
     "cryptomator",
+    "winfsp-np",
 ]  # Add your desired apps
 DEST_DIR = "bucket"
 
@@ -23,6 +24,7 @@ UPSTREAMS = {
     "main": "https://raw.githubusercontent.com/ScoopInstaller/Main/master/bucket/",
     "extras": "https://raw.githubusercontent.com/ScoopInstaller/Extras/master/bucket/",
     "nerd-fonts": "https://raw.githubusercontent.com/matthewjberger/scoop-nerd-fonts/master/bucket/",
+    "nonportable": "https://raw.githubusercontent.com/ScoopInstaller/Nonportable/master/bucket/",
 }
 
 os.makedirs(DEST_DIR, exist_ok=True)
