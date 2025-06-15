@@ -40,7 +40,7 @@ jobs:
           fi
 
       - name: Send Pushover notification
-        if: steps.commit_step.outputs.committed == 'true'
+        if: steps.commit_step.outputs.committed == 'false'
         run: |
           curl -s \
             --form-string "token=${{ secrets.PUSHOVER_APP_TOKEN }}" \
