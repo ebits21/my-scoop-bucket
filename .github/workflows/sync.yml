@@ -25,9 +25,26 @@ jobs:
         run: python sync_manifests.py
 
       - name: Commit and push changes
+        id: commit_step
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add bucket
-          git diff --cached --quiet || git commit -m "Sync manifests (auto-update)"
-          git push
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            echo "committed=false" >> $GITHUB_OUTPUT
+          else
+            git commit -m "Sync manifests (auto-update)"
+            git push
+            echo "committed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Send Pushover notification
+        if: steps.commit_step.outputs.committed == 'true'
+        run: |
+          curl -s \
+            --form-string "token=${{ secrets.PUSHOVER_APP_TOKEN }}" \
+            --form-string "user=${{ secrets.PUSHOVER_USER_KEY }}" \
+            --form-string "title=Scoop Auto Sync" \
+            --form-string "message=✅ Scoop manifests were updated and committed." \
+            https://api.pushover.net/1/messages.json
