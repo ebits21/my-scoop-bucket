@@ -8,6 +8,5 @@
       "hash": "645b7d2f6397f1fe93b8b8580f1e53c78ea47903782b7ae2d85bd4927e8bb8c8"
     }
   },
-  "extract_dir": "clippy-windows-amd64-v.0.0.2",
   "bin": "clippy.exe"
 }
