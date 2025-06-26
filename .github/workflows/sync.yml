@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Needed to compare previous commit
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -46,7 +46,7 @@ jobs:
         run: |
           CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | head -n 10)
 
-          MESSAGE=$(printf "✅ Scoop manifests were updated!\n\nModified files:\n\n")
+          MESSAGE=$(printf "✅ Scoop manifests were updated!\n\nModified files:\n")
           while read -r file; do
             MESSAGE="${MESSAGE}\n• ${file}"
           done <<< "$CHANGED_FILES"
@@ -55,5 +55,5 @@ jobs:
             --form "token=${{ secrets.PUSHOVER_APP_TOKEN }}" \
             --form "user=${{ secrets.PUSHOVER_USER_KEY }}" \
             --form "title=Scoop Auto Sync" \
-            --form "message=${printf "MESSAGE"}" \
+            --form "message=$(printf "%b" "$MESSAGE")" \
             https://api.pushover.net/1/messages.json
