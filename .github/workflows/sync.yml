@@ -45,19 +45,18 @@ jobs:
         if: steps.commit_step.outputs.committed == 'true'
         run: |
           CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | head -n 10)
+
           MESSAGE="✅ Scoop manifests were updated and committed.
 
 Modified files:"
           while read -r file; do
-            MESSAGE="$MESSAGE
-• $file"
+            MESSAGE="${MESSAGE}
+• ${file}"
           done <<< "$CHANGED_FILES"
-
-          echo "$MESSAGE" > message.txt
 
           curl -s \
             --form "token=${{ secrets.PUSHOVER_APP_TOKEN }}" \
             --form "user=${{ secrets.PUSHOVER_USER_KEY }}" \
             --form "title=Scoop Auto Sync" \
-            --form "message=<message.txt" \
+            --form "message=${MESSAGE}" \
             https://api.pushover.net/1/messages.json
