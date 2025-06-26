@@ -46,12 +46,9 @@ jobs:
         run: |
           CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | head -n 10)
 
-          MESSAGE="✅ Scoop manifests were updated and committed.
-
-Modified files:"
+          MESSAGE=$(printf "✅ Scoop manifests were updated and committed.\n\nModified files:\n")
           while read -r file; do
-            MESSAGE="${MESSAGE}
-• ${file}"
+            MESSAGE="${MESSAGE}• ${file}\n"
           done <<< "$CHANGED_FILES"
 
           curl -s \
