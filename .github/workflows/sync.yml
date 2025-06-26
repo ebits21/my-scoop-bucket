@@ -48,7 +48,7 @@ jobs:
 
           MESSAGE=$(printf "✅ Scoop manifests were updated:\n\nModified files:\n\n")
           while read -r file; do
-            MESSAGE="${MESSAGE}• ${file}\n\n"
+            MESSAGE="${MESSAGE}• ${file}"
           done <<< "$CHANGED_FILES"
 
           curl -s \
