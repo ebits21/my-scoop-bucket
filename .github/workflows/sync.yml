@@ -3,7 +3,7 @@ name: Sync Selected Scoop Manifests
 on:
   schedule:
     - cron: '0 4 * * *'  # Runs daily at 04:00 UTC
-  workflow_dispatch:
+  workflow_dispatch:      # Allow manual trigger
 
 jobs:
   sync:
@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Needed to compare previous commit for file diff
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -45,14 +45,17 @@ jobs:
         if: steps.commit_step.outputs.committed == 'true'
         run: |
           CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | head -n 10)
-          MESSAGE="✅ Scoop manifests were updated and committed.%0A%0AModified files:"
+          MESSAGE="✅ Scoop manifests were updated and committed.
+
+Modified files:"
           while read -r file; do
-            MESSAGE="${MESSAGE}%0A• ${file}"
+            MESSAGE="$MESSAGE
+• $file"
           done <<< "$CHANGED_FILES"
 
           curl -s \
             --form-string "token=${{ secrets.PUSHOVER_APP_TOKEN }}" \
             --form-string "user=${{ secrets.PUSHOVER_USER_KEY }}" \
             --form-string "title=Scoop Auto Sync" \
-            --form-string "message=${MESSAGE}" \
+            --form-string "message=$MESSAGE" \
             https://api.pushover.net/1/messages.json
