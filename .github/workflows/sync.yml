@@ -3,7 +3,7 @@ name: Sync Selected Scoop Manifests
 on:
   schedule:
     - cron: '0 4 * * *'  # Runs daily at 04:00 UTC
-  workflow_dispatch:      # Allow manual trigger
+  workflow_dispatch:
 
 jobs:
   sync:
@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Needed to compare previous commit for file diff
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -53,9 +53,11 @@ Modified files:"
 • $file"
           done <<< "$CHANGED_FILES"
 
+          echo "$MESSAGE" > message.txt
+
           curl -s \
-            --form-string "token=${{ secrets.PUSHOVER_APP_TOKEN }}" \
-            --form-string "user=${{ secrets.PUSHOVER_USER_KEY }}" \
-            --form-string "title=Scoop Auto Sync" \
-            --form-string "message=$MESSAGE" \
+            --form "token=${{ secrets.PUSHOVER_APP_TOKEN }}" \
+            --form "user=${{ secrets.PUSHOVER_USER_KEY }}" \
+            --form "title=Scoop Auto Sync" \
+            --form "message=<message.txt" \
             https://api.pushover.net/1/messages.json
