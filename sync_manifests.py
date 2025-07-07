@@ -19,6 +19,7 @@ APPS = [
     "winfsp-np",
     "rustdesk",
     "anydesk",
+    "tightvnc",
 ]  # Add your desired apps
 DEST_DIR = "bucket"
 
