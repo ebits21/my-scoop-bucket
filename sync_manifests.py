@@ -18,6 +18,7 @@ APPS = [
     "cryptomator",
     "winfsp-np",
     "rustdesk",
+    "anydesk",
 ]  # Add your desired apps
 DEST_DIR = "bucket"
 
