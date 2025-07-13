@@ -18,6 +18,7 @@ APPS = [
     "cryptomator",
     "winfsp-np",
     "tightvnc",
+    "ultravnc",
 ]  # Add your desired apps
 DEST_DIR = "bucket"
 
