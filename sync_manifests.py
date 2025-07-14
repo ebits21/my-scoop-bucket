@@ -17,8 +17,8 @@ APPS = [
     "vcredist2022",
     "cryptomator",
     "winfsp-np",
-    "tightvnc",
     "ultravnc",
+    "go",
 ]  # Add your desired apps
 DEST_DIR = "bucket"
 
