@@ -19,6 +19,7 @@ APPS = [
     "winfsp-np",
     "ultravnc",
     "go",
+    "rustdesk",
 ]  # Add your desired apps
 DEST_DIR = "bucket"
 
