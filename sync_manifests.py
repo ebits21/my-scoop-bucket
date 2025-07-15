@@ -20,6 +20,7 @@ APPS = [
     "ultravnc",
     "go",
     "rustdesk",
+    "tightvnc",
 ]  # Add your desired apps
 DEST_DIR = "bucket"
 
