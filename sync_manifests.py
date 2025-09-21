@@ -21,6 +21,7 @@ APPS = [
     "go",
     "rustdesk",
     "tightvnc",
+    "flow-launcher",
 ]  # Add your desired apps
 DEST_DIR = "bucket"
 
