@@ -17,11 +17,9 @@ APPS = [
     "vcredist2022",
     "cryptomator",
     "winfsp-np",
-    "ultravnc",
     "go",
-    "rustdesk",
-    "tightvnc",
     "flow-launcher",
+    "powertoys",
 ]  # Add your desired apps
 DEST_DIR = "bucket"
 
