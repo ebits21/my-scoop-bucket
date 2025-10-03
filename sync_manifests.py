@@ -20,6 +20,7 @@ APPS = [
     "go",
     "flow-launcher",
     "powertoys",
+    "sumatrapdf",
 ]  # Add your desired apps
 DEST_DIR = "bucket"
 
