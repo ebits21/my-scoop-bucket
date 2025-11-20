@@ -18,9 +18,8 @@ APPS = [
     "cryptomator",
     "winfsp-np",
     "go",
-    "flow-launcher",
-    "powertoys",
     "sumatrapdf",
+    "poppler",
 ]  # Add your desired apps
 DEST_DIR = "bucket"
 
